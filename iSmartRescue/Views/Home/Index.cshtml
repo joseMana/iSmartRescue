@@ -5,10 +5,16 @@
 <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
 <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
+<!--jQuery-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <!--Google Map Js-->
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUppA4_tlXLrFh-BpL1HSeYRcRAC9DIBg&callback=initMap&libraries=&v=weekly" defer></script>
 <style>
+    #target {
+        width: 345px;
+    }
+
     #map {
         overflow: hidden;
         padding-bottom: 56.25%;
@@ -317,35 +323,59 @@
                     <h4 class="modal-title" style="float:left">EMERGENCY</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Emergency Code:</label>
-                        <input type="text" class="form-control" id="emergencyCode">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label>Emergency Code:</label>
+                                    <input type="text" class="form-control" id="emergencyCode">
+                                </div>
+                                <div class="form-group">
+                                    <label>Location:<span style="font-size:12px;font-style:italic">(Geolocation is enabled)</span></label>
+                                    <input type="text" class="form-control" id="location">
+                                </div>
+                                <div class="form-group">
+                                    <p>Latitude:<span id="lat"></span></p>
+                                    <p>Longtitude:<span id="lng"></span></p>
+                                    <p>GoogleMapURL:<a href="" id="gmaplink" target="_blank"></a></p>
+                                    <p>Formatted Address:<span id="address"></span></p>
+                                </div>
+                            </div>
+                            <div class="col-xs-6">
+                                <div class="form-group">
+                                    <img src="~/img/anne.jpg" style=" width: 220px; height: 155px;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checkbox">
+                            <label>Patient Has HealthCard?</label>
+                            <input type="checkbox">
+                        </div>
+                        <div style="display:none;">
+                            <div class="form-group">
+                                <label>Patient Name:</label>
+                                <input type="text" class="form-control" id="patientName">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number:</label>
+                                <input type="text" class="form-control" id="phoneNumber">
+                            </div>
+                            <div class="form-group">
+                                <label>Health Card Information:</label>
+                                <input type="text" class="form-control" id="healthCardInformation">
+                            </div>
+                            <div class="form-group">
+                                <label>Health Card Account Number:</label>
+                                <input type="text" class="form-control" id="healthCardAccountNumber">
+                            </div>
+                        </div>
+
                     </div>
-                    <div class="form-group">
-                        <label for="pwd">Location:</label>
-                        <input type="text" class="form-control" id="location">
-                    </div>
-                    <div class="form-group">
-                        <label>Patient Name:</label>
-                        <input type="text" class="form-control" id="patientName">
-                    </div>
-                    <div class="form-group">
-                        <label>Phone Number:</label>
-                        <input type="text" class="form-control" id="phoneNumber">
-                    </div>
-                    <div class="form-group">
-                        <label>Health Card Information:</label>
-                        <input type="text" class="form-control" id="healthCardInformation">
-                    </div>
-                    <div class="form-group">
-                        <label>Health Card Account Number:</label>
-                        <input type="text" class="form-control" id="healthCardAccountNumber">
-                    </div>
-                    <div class="checkbox">
-                        <label>Is Something : </label>
-                        <input type="checkbox">
-                    </div>
-                    <button type="button" class="btn btn-success" style="background:red" onclick="raiseEmergency()">Raise Emergency!</button>
+
+
+
+
+                    <button type="button" class="btn btn-success" style="background:red;float:right" onclick="raiseEmergency()">Raise Emergency!</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -414,14 +444,12 @@
 <!-- Page Js -->
 <script>
     function raiseEmergency() {
-
         var emergencyCode = $('#emergencyCode').val();
         var location = $('#location').val();
         var patientName = $('#patientName').val();
         var phoneNumber = $('#phoneNumber').val();
         var healthCardInformation = $('#healthCardInformation').val();
         var healthCardAccountNumber = $('#healthCardAccountNumber').val();
-
         $.ajax({
             url: '/Home/RaiseEmergency',
             data: {
@@ -450,6 +478,48 @@
                 $('#modalOverlay').modal("show");
             },
         });
-
     }
+
+    $('#location').on("input", function () {
+        var loc = this.value;
+
+        if (loc.length < 6) { return; }
+
+        $.ajax({
+            url: '/Home/GeoLocate',
+            data: {
+                'location': loc
+            },
+            dataType: "json",
+            type: "GET",
+            success: function (result) {
+                if (result.result.candidates.length == 0) { return; }
+
+                var formatted_address = result.result.candidates[0].formatted_address;
+                var latitude = result.result.candidates[0].geometry.location.lat;
+                var longtitude = result.result.candidates[0].geometry.location.lng;
+                var anchorTag = result.result.candidates[0].photos[0].html_attributions[0].split('"')[1];
+
+                document.getElementById('lat').innerText = latitude;
+                document.getElementById('lng').innerText = longtitude;
+                $("#gmaplink").attr("href", anchorTag); document.getElementById('gmaplink').innerHTML = anchorTag;
+                document.getElementById('address').innerText = formatted_address;
+
+            },
+            error: function (req, status, error) {
+                console.log("Req: " + req);
+                console.log("Status: " + status);
+                console.log("Error: " + error);
+                $('#modalOverlay').modal("hide");
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#modalOverlay').modal("hide");
+                }, 500);
+            },
+            beforeSend: function () {
+                $('#modalOverlay').modal("show");
+            },
+        });
+    });
 </script>
