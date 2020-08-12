@@ -355,6 +355,14 @@
                                     <input type="text" class="form-control" id="emergencyCode">
                                 </div>
                                 <div class="form-group">
+                                    <label>Patient Name:</label>
+                                    <input type="text" class="form-control" id="patientName">
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number:</label>
+                                    <input type="text" class="form-control" id="phoneNumber">
+                                </div>
+                                <div class="form-group">
                                     <label>Location:<span style="font-size:12px;font-style:italic">(Geolocation is enabled)</span></label>
                                     <input type="text" class="form-control" id="location">
                                 </div>
@@ -527,20 +535,20 @@
             dataType: "json",
             type: "GET",
             success: function (result) {
-                $('#ambulancedataTable tbody').remove();
+                $('#ambulancedataTable tbody tr').remove();
                 $('#ambulancedataTable').css({ display: "block" });
                 for (var i = 0; i < result.result.LatLangValues.length; i++) {
-                    $("#ambulancedataTable").append(
+                    $("#ambulancedataTable tbody").append(
                         "<tr id='" + result.result.LatLangValues[i].AmbulanceId + "'><td>" + result.result.LatLangValues[i].AmbulanceId + "</td><td>" + result.result.LatLangValues[i].AmbulanceCode + "</td>" +
                         "<td>" + result.result.LatLangValues[i].DistanceValue + "</td>" +
                         "<td><input id='" + result.result.LatLangValues[i].AmbulanceId + "' type='button' class='btn btn-primary' value='Select Ambulance' onclick='selectAmbulance(this.id)'/> </td ></tr > ");
                 }
 
-                $('#medProviderdataTable tbody').remove();
+                $('#medProviderdataTable tbody tr').remove();
                 $('#medProviderdataTable').css({ display: "block" });
                 for (var i = 0; i < result.result.MedicalProviders.length; i++) {
-                    $("#medProviderdataTable").append(
-                        "<tr id='" + result.result.MedicalProviders[i].Name + "'><td>" + result.result.MedicalProviders[i].Name + "</td><td>" + result.result.MedicalProviders[i].AddressLine1 + "</td>" +
+                    $("#medProviderdataTable tbody").append(
+                        "<tr id='" + result.result.MedicalProviders[i].TableRowId + "'><td>" + result.result.MedicalProviders[i].Name + "</td><td>" + result.result.MedicalProviders[i].AddressLine1 + "</td>" +
                         "<td><input id='" + result.result.MedicalProviders[i].Name + "' type='button' class='btn btn-primary' value='Select Medical Provider' onclick='selectMedicalProvider(this.id)'/> </td></tr> ");
                 }
             },
@@ -561,13 +569,25 @@
         });
     }
     function selectAmbulance(id) {
-        $('#' + id).css({ background: "green" });
-
+        var trLength = document.getElementById('ambulancedataTable').getElementsByTagName('tr').length;
+        for (var i = 1; i < trLength; i++) {
+            var bgcolor = document.getElementById('ambulancedataTable').getElementsByTagName('tr')[i].style.background;
+            if (bgcolor == "lightgreen") {
+                document.getElementById('ambulancedataTable').getElementsByTagName('tr')[i].style.background = "white";
+            }
+        }
+        $('#' + id).css({ background: "lightgreen" });
         sessionAmbulanceId = id;
     }
     function selectMedicalProvider(id) {
-        $('#' + id).css({ background: "green" });
-        console.log(id);
+        var trLength = document.getElementById('medProviderdataTable').getElementsByTagName('tr').length;
+        for (var i = 1; i < trLength; i++) {
+            var bgcolor = document.getElementById('medProviderdataTable').getElementsByTagName('tr')[i].style.background;
+            if (bgcolor == "lightgreen") {
+                document.getElementById('medProviderdataTable').getElementsByTagName('tr')[i].style.background = "white";
+            }
+        }
+        $('#' + id).css({ background: "lightgreen" });
         sessionMedicalProvider = id;
     }
     function raiseEmergency() {

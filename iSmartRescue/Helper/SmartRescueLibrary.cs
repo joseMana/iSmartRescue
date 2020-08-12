@@ -19,8 +19,8 @@ namespace iSmartRescue.Helper
         {
             using (SqlConnection connection = new SqlConnection(connString))
             {
-                SqlCommand command = new SqlCommand("INSERT INTO dbo.ServiceRequest(EmergencyTypeId,PatientAddressLine1,PatientName,PatientContact,LocationCoordinatesX,LocationCoordinatesY,AssignedAmbulanceId,AssignedMedicalProviderId) " +
-                    "VALUES ((SELECT EmergencyTypeId FROM dbo.EmergencyType WHERE EmergencyTypeCode = @EmergencyTypeCode)," +
+                SqlCommand command = new SqlCommand("INSERT INTO dbo.ServiceRequest(DateOfRequest,EmergencyTypeId,PatientAddressLine1,PatientName,PatientContact,LocationCoordinatesX,LocationCoordinatesY,AssignedAmbulanceId,AssignedMedicalProviderId) " +
+                    "VALUES (GETDATE(),(SELECT EmergencyTypeId FROM dbo.EmergencyType WHERE EmergencyTypeCode = @EmergencyTypeCode)," +
                     "@Location,@PatientName,@PhoneNumber,@Latitude,@Longtitude,@AssignedAmbulanceId,(SELECT MedicalProviderId FROM dbo.MedicalProvider WHERE MedicalProviderName=@AssignedMedicalProviderId))"
                     , connection);
 
@@ -136,11 +136,13 @@ namespace iSmartRescue.Helper
             catch (Exception ex)
             {
             }
+            int tblRowId = 1;
             foreach (DataRow row in dtRetValue.Rows)
             {
                 medicalProviders.Add(
                     new MedicalProviders
                     {
+                        TableRowId = tblRowId++,
                         Name = row["MedicalProviderName"].ToString(),
                         Latitude = row["CoordinatesX"].ToString(),
                         Longtitude = row["CoordinatesY"].ToString(),
