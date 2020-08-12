@@ -120,9 +120,13 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Class\AmbulanceAndProviderObject.cs" />
+    <Compile Include="Class\AmbulanceLocation.cs" />
+    <Compile Include="Class\DistanceMatrixApiResponse.cs" />
     <Compile Include="Class\GeoLocationApiResponse.cs" />
+    <Compile Include="Class\MedicalProviders.cs" />
     <Compile Include="Controllers\AmbulanceController.cs" />
-    <Compile Include="Helper\HelperClass.cs" />
+    <Compile Include="Helper\SmartRescueLibrary.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
