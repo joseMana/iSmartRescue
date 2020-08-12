@@ -23,11 +23,13 @@ namespace iSmartRescue.Controllers
 
             return Json(new { result = HelperClass.GetGeoLocationApiResponse(location) }, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult RaiseEmergency(string emergencyCode, string location, string patientName, string phoneNumber)
+
+
+        public JsonResult RaiseEmergency(string emergencyCode, string location, string patientName, string phoneNumber,string latitude, string longtitude)
         {
             List<string> result = new List<string>();
 
-            HelperClass.CreateServiceRequest(emergencyCode,location,patientName,phoneNumber);
+            HelperClass.CreateServiceRequest(emergencyCode,location,patientName,phoneNumber,latitude,longtitude);
 
             return Json(new { result = result }, JsonRequestBehavior.AllowGet);
         }

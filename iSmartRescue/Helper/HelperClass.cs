@@ -14,24 +14,28 @@ namespace iSmartRescue.Controllers
     {
         private static string connString = ConfigurationManager.ConnectionStrings["ismartRescueDB"].ConnectionString;
 
-        public static void CreateServiceRequest(string emergencyCode, string location, string patientName, string phoneNumber)
+        public static void CreateServiceRequest(string emergencyCode, string location, string patientName, string phoneNumber, string latitude, string longtitude)
         {
             using (SqlConnection connection = new SqlConnection(connString))
             {
-                SqlCommand command = new SqlCommand("INSERT INTO dbo.ServiceRequest(EmergencyTypeId,PatientAddressLine1,PatientName,PatientContact) " +
+                SqlCommand command = new SqlCommand("INSERT INTO dbo.ServiceRequest(EmergencyTypeId,PatientAddressLine1,PatientName,PatientContact,CoordinateX,CoordinateY) " +
                     "VALUES ((SELECT EmergencyTypeId FROM dbo.EmergencyType WHERE EmergencyTypeCode = @EmergencyTypeCode)," +
-                    "@Location,@PatientName,@PhoneNumber)"
+                    "@Location,@PatientName,@PhoneNumber,@Latitude,@Longtitude)"
                     , connection);
 
                 command.Parameters.Add("@EmergencyTypeCode", SqlDbType.VarChar);
                 command.Parameters.Add("@Location", SqlDbType.VarChar);
                 command.Parameters.Add("@PatientName", SqlDbType.VarChar);
                 command.Parameters.Add("@PhoneNumber", SqlDbType.VarChar);
+                command.Parameters.Add("@Latitude", SqlDbType.VarChar);
+                command.Parameters.Add("@Longtitude", SqlDbType.VarChar);
 
                 command.Parameters["@EmergencyTypeCode"].Value = emergencyCode;
                 command.Parameters["@Location"].Value = location;
                 command.Parameters["@PatientName"].Value = patientName;
                 command.Parameters["@PhoneNumber"].Value = phoneNumber;
+                command.Parameters["@Latitude"].Value = latitude;
+                command.Parameters["@Longtitude"].Value = longtitude;
 
                 try
                 {

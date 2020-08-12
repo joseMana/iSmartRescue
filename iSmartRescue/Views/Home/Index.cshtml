@@ -445,18 +445,27 @@
 <script>
     function raiseEmergency() {
         var emergencyCode = $('#emergencyCode').val();
-        var location = $('#location').val();
+        //var location = $('#location').val();
         var patientName = $('#patientName').val();
         var phoneNumber = $('#phoneNumber').val();
         var healthCardInformation = $('#healthCardInformation').val();
         var healthCardAccountNumber = $('#healthCardAccountNumber').val();
+
+        //geolocation apis
+        var latitude = document.getElementById('lat').innerText;
+        var longtitude = document.getElementById('lng').innerText;
+        var $("#gmaplink").attr("href", anchorTag); document.getElementById('gmaplink').innerHTML = anchorTag;
+        location = document.getElementById('address').innerText;
+
         $.ajax({
             url: '/Home/RaiseEmergency',
             data: {
                 'emergencyCode': emergencyCode,
                 'location': location,
                 'patientName': patientName,
-                'phoneNumber': phoneNumber
+                'phoneNumber': phoneNumber,
+                'latitude': latitude,
+                'longtiude': longtitude
             },
             dataType: "json",
             type: "GET",
