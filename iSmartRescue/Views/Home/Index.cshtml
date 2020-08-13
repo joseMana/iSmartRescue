@@ -55,7 +55,6 @@
         overflow-y: auto;
     }
 </style>
-
 <div class="container-fluid">
 
     <!-- Page Heading -->
@@ -375,7 +374,7 @@
                                 <div class="form-group">
                                     <button type="button" class="btn btn-success" style="background:green" onclick="searchAmbulance()">Search Ambulance</button>
                                 </div>
-                                <table id="ambulancedataTable" class="table table-striped table-bordered table-hover dataTable no-footer" role="grid" aria-describedby="dataTables-example_info" style="display:none">
+                                <table id="ambulancedataTable" class="table table-striped table-active table-hover dataTable no-footer" role="grid" aria-describedby="dataTables-example_info" style="display:none">
                                     <thead>
                                         <tr role="row">
                                             <th>AmbulanceID</th>
@@ -471,7 +470,6 @@
         </div>
     </div>
 </div>
-
 <!-- Overlay -->
 <style>
     .btn-group > .btn:first-child {
@@ -518,7 +516,6 @@
         display: none;
     }
 </style>
-
 <!-- Page Js -->
 <script>
     function searchAmbulance() {
@@ -548,7 +545,7 @@
             type: "GET",
             success: function (result) {
                 $('#ambulancedataTable tbody tr').remove();
-                $('#ambulancedataTable').css({ display: "block" });
+                $('#ambulancedataTable').css({ display: "" });
                 for (var i = 0; i < result.result.LatLangValues.length; i++) {
                     $("#ambulancedataTable tbody").append(
                         "<tr id='" + result.result.LatLangValues[i].AmbulanceId + "'><td>" + result.result.LatLangValues[i].AmbulanceId + "</td><td>" + result.result.LatLangValues[i].AmbulanceCode + "</td>" +
@@ -684,7 +681,7 @@
                 //}
 
                 $('#medProviderdataTable tbody tr').remove();
-                $('#medProviderdataTable').css({ display: "block" });
+                $('#medProviderdataTable').css({ display: "" });
                 for (var i = 0; i < result.result.LatLangValues.length; i++) {
                     var newName = result.result.LatLangValues[i].MedicalProviderName.replace(/-/g, ' ');
                     $("#medProviderdataTable tbody").append(
