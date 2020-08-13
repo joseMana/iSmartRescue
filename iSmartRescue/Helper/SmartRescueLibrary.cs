@@ -6,6 +6,8 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.Net;
+using System.Net.Mail;
+using System.Text;
 using iSmartRescue.Class;
 using Newtonsoft.Json;
 
@@ -367,7 +369,6 @@ namespace iSmartRescue.Helper
 
             return result;
         }
-
         public static void SendText(string strName, bool healthStatus, string strReason, string strInfo, string strRemarks,string emergencyCode,string ambulanceId)
         {
             string CPNumber = "639219833634";
@@ -405,6 +406,77 @@ namespace iSmartRescue.Helper
                 //Console.WriteLine("Error: " + ex.ToString());
             }
 
+        }
+        public static void SendEmail(string toemail, string providerName, string strName, bool healthStatus, string healthcardname, string healthcardnumber, string emergencycode, string strRemarks, string ambulancecontactno, string ambulanceCode)
+        {
+            try
+            {
+                NetworkCredential login;
+                SmtpClient client;
+                MailMessage msg;
+                string strhealthStatus;
+
+                login = new NetworkCredential("anneblance000@gmail.com", "teamcareftw");
+                client = new SmtpClient("smtp.gmail.com");
+                client.Port = Convert.ToInt32("587");
+                client.EnableSsl = true;
+                client.Credentials = login;
+                msg = new MailMessage { From = new MailAddress("anneblance000@gmail.com", "iSmartRescue", Encoding.UTF8) };
+                msg.To.Add(new MailAddress(toemail));
+                msg.Subject = "[Urgent] Request for Medical Assistance";
+
+                if (healthStatus == true)
+                {
+                    strhealthStatus = "YES";
+                }
+                else
+                {
+                    strhealthStatus = "NO";
+                }
+
+                string message = "Dear " + providerName + ";<br> <br> There is an incoming patient under Emergency Code: <b>" + emergencycode + ".</b> <br>" +
+                                   " Please be ready for the availability of medical staff and necessary equipment under this code <br><br>";
+                if (strhealthStatus == "YES")
+                {
+                    msg.Body = message +
+                        "<b>Patient Name: </b>" + strName + "<br>" +
+                        "<b>Contact Number: </b>" + strName + "<br>" +
+                        "<b>Emergency Code: </b>" + emergencycode + "<br>" +
+                        "<b>With Health Card?</b>: " + strhealthStatus + "<br>" +
+                        "<b>Health Card Provider</b>: " + healthcardname + "<br>" +
+                        "<b>Health Card Number</b>: " + healthcardnumber + "<br>" +
+                        "<b>Ambulance Code:</b>: " + ambulanceCode + "<br>" +
+                        "<b>Ambulance Contact No:</b>: " + ambulancecontactno + "<br>" +
+                        "<b>Notes</b>: " + strRemarks + "<br><br>" +
+                        "This is auto generate email please do not response." + "<br><br>" +
+                        "Thank You! <br><br>" +
+                        "Regards, " + "<br><br>" +
+                        "iSmartRescue";
+                }
+                else
+                {
+                    msg.Body = message +
+                        "<b>Patient Name: </b>" + strName + "<br>" +
+                        "<b>Emergency Code: </b>" + emergencycode + "<br>" +
+                        "<b>With Health Card?</b>: " + strhealthStatus + "<br>" +
+                        "<b>Health Card Provider</b>: " + healthcardname + "<br>" +
+                        "<b>Notes</b>: " + strRemarks + "<br><br>" +
+                        "This is auto generate email please do not response." + "<br><br>" +
+                        "Thank You! <br><br>" +
+                        "Regards, " + "<br><br>" +
+                        "iSmartRescue";
+                }
+                msg.BodyEncoding = Encoding.UTF8;
+                msg.IsBodyHtml = true;
+                msg.Priority = MailPriority.High;
+                msg.DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure;
+
+                client.Send(msg);
+            }
+            catch (Exception ex)
+            {
+                //Console.Write("Error:" + ex.Message);
+            }
         }
 
     }

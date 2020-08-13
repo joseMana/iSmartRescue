@@ -90,6 +90,13 @@ namespace iSmartRescue.Controllers
 
             SmartRescueLibrary.SendText(patientName, ((healthCard != "") ? true : false),"EMERGENCY!", healthCardAccountNumber,"EMERGENCY", emergencyCode, ambulanceId) ;
 
+            try
+            {
+                SmartRescueLibrary.SendEmail("veronica.j.del.moro@accenture.com", medicalProviderName, patientName, ((healthCard != "") ? true : false), healthCard, healthCardAccountNumber, emergencyCode, "", "+09361841233", ambulanceId);
+            }
+            catch (Exception ex)
+            {  }
+
             return Json(new { result = result }, JsonRequestBehavior.AllowGet);
         }
     }
