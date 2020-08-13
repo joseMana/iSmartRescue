@@ -17,6 +17,8 @@ namespace iSmartRescue.Class
         public Guid medicalproviderid { get; set; }
         public string medicalprovidername { get; set; }
         public string medicalproviderlocation { get; set; }
+        public string miles { get; set; }
+
 
     }
     public class rows

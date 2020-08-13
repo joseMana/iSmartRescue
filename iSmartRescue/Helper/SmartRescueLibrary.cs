@@ -121,7 +121,7 @@ namespace iSmartRescue.Helper
                         AmbulanceContactNo = row["AmbulanceContactNumber"].ToString(),
                         AmbulanceCode = row["AmbulanceCode"].ToString(),
                         Latitude = row["CoordinatesX"].ToString(),
-                        Longtitude = row["CoordinatesY"].ToString()
+                        Longtitude = row["CoordinatesY"].ToString(),
                     });
             }
 
@@ -171,6 +171,57 @@ namespace iSmartRescue.Helper
                     {
                         TableRowId = tblRowId++,
                         Name = row["MedicalProviderName"].ToString().Replace(" ","-"),
+                        Latitude = row["CoordinatesX"].ToString(),
+                        Longtitude = row["CoordinatesY"].ToString(),
+                        AddressLine1 = row["AddressLine1"].ToString()
+                    });
+            }
+
+            return medicalProviders;
+        }
+        public static List<MedicalProviders> GetMedicalProviderHealthCardAvailability(string emergencyCode, string healthCard)
+        {
+            DataTable dtRetValue = new DataTable();
+            List<MedicalProviders> medicalProviders = new List<MedicalProviders>();
+            string strQuery = "EXEC dbo.GetMedicalProviderOfHealthCard '" + emergencyCode + "', '"+ healthCard + "'";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    DataSet dataset = new DataSet();
+                    SqlDataAdapter adapter = new SqlDataAdapter() { SelectCommand = new SqlCommand(strQuery, conn) };
+                    adapter.SelectCommand.CommandTimeout = 3600;
+                    adapter.SelectCommand.CommandType = CommandType.Text;
+                    adapter.Fill(dataset);
+                    try
+                    {
+                        for (int i = 1; i < dataset.Tables.Count; i++)
+                        {
+                            if (dataset.Tables[i].Rows.Count > 1)
+                            {
+                                dataset.Tables[0].Merge(dataset.Tables[i]);
+                            }
+                        }
+                        dtRetValue = dataset.Tables[0];
+                    }
+                    catch (Exception e)
+                    {
+                        dtRetValue = dataset.Tables[0];
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            int tblRowId = 1;
+            foreach (DataRow row in dtRetValue.Rows)
+            {
+                medicalProviders.Add(
+                    new MedicalProviders
+                    {
+                        TableRowId = tblRowId++,
+                        Name = row["MedicalProviderName"].ToString().Replace(" ", "-"),
                         Latitude = row["CoordinatesX"].ToString(),
                         Longtitude = row["CoordinatesY"].ToString(),
                         AddressLine1 = row["AddressLine1"].ToString()
@@ -233,7 +284,6 @@ namespace iSmartRescue.Helper
 
             return CalculateNearestAmbulance(apiResults);
         }
-
         public static List<LatLangValues> GetLocationDistance2(List<MedicalProviders> medicalProviders, string patientLatitude, string patientLongtitude)
         {
             List<DistanceMatrixApiResponse> apiResults = new List<DistanceMatrixApiResponse>();
@@ -268,7 +318,6 @@ namespace iSmartRescue.Helper
 
             return CalculateNearestMedicalProvider(apiResults);
         }
-
         private static List<LatLangValues> CalculateNearestAmbulance(List<DistanceMatrixApiResponse> apiResults)
         {
             List<LatLangValues> result = new List<LatLangValues>();
@@ -280,10 +329,11 @@ namespace iSmartRescue.Helper
                 result.Add(
                     new LatLangValues 
                     { 
-                        DistanceValue = d.rows[0].elements[0].distance.value , 
+                        DistanceValue = Convert.ToInt32(d.rows[0].elements[0].distance.value) , 
                         AmbulanceId = d.ambulanceid,
                         AmbulanceContactNo = d.ambulancecontactno,
-                        AmbulanceCode = d.ambulancecode
+                        AmbulanceCode = d.ambulancecode,
+                        Miles = d.rows[0].elements[0].distance.text
                     });
                 //Console.WriteLine(d.destination_addresses[0]);
                 //Console.WriteLine(d.rows[0].elements[0].distance.text);
@@ -304,10 +354,10 @@ namespace iSmartRescue.Helper
                 result.Add(
                     new LatLangValues
                     {
-                        DistanceValue = d.rows[0].elements[0].distance.value,
+                        DistanceValue = Convert.ToInt32(d.rows[0].elements[0].distance.value),
                         MedicalProviderName = d.medicalprovidername,
-                        MedicalProviderLocation = d.medicalproviderlocation
-                        
+                        MedicalProviderLocation = d.medicalproviderlocation,
+                        Miles = d.rows[0].elements[0].distance.text
                     });
                 //Console.WriteLine(d.destination_addresses[0]);
                 //Console.WriteLine(d.rows[0].elements[0].distance.text);

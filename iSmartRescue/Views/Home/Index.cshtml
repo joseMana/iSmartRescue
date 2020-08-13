@@ -379,7 +379,7 @@
                                         <tr role="row">
                                             <th>AmbulanceID</th>
                                             <th>AmbulanceCode</th>
-                                            <th>Distance Between Patient</th>
+                                            <th>Distance From Patient</th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -435,7 +435,7 @@
                             <thead>
                                 <tr role="row">
                                     <th>MedicalProviderName</th>
-                                    <th>Distance Between Patient</th>
+                                    <th>Distance From Patient</th>
                                     <th>Location</th>
                                     <th></th>
                                 </tr>
@@ -549,7 +549,7 @@
                 for (var i = 0; i < result.result.LatLangValues.length; i++) {
                     $("#ambulancedataTable tbody").append(
                         "<tr id='" + result.result.LatLangValues[i].AmbulanceId + "'><td>" + result.result.LatLangValues[i].AmbulanceId + "</td><td>" + result.result.LatLangValues[i].AmbulanceCode + "</td>" +
-                        "<td>" + result.result.LatLangValues[i].DistanceValue + "</td>" +
+                        "<td>" + result.result.LatLangValues[i].Miles + "</td>" +
                         "<td><input id='" + result.result.LatLangValues[i].AmbulanceId + "' type='button' class='btn btn-primary' value='Select Ambulance' onclick='selectAmbulance(this.id)'/> </td ></tr > ");
                 }
 
@@ -685,7 +685,7 @@
                 for (var i = 0; i < result.result.LatLangValues.length; i++) {
                     var newName = result.result.LatLangValues[i].MedicalProviderName.replace(/-/g, ' ');
                     $("#medProviderdataTable tbody").append(
-                        "<tr id='" + result.result.LatLangValues[i].MedicalProviderName + "'><td>" + newName + "</td><td>" + result.result.LatLangValues[i].DistanceValue  + "</td>" + "<td>" + result.result.LatLangValues[i].MedicalProviderLocation+"</td>" +
+                        "<tr id='" + result.result.LatLangValues[i].MedicalProviderName + "'><td>" + newName + "</td><td>" + result.result.LatLangValues[i].Miles  + "</td>" + "<td>" + result.result.LatLangValues[i].MedicalProviderLocation+"</td>" +
                         "<td><input id='" + result.result.LatLangValues[i].MedicalProviderName + "' type='button' class='btn btn-primary' value='Select Medical Provider' onclick='selectMedicalProvider(this.id)'/> </td></tr> ");
                 }
             },

@@ -38,7 +38,7 @@ namespace iSmartRescue.Controllers
             //}
 
             AmbulanceAndProviderObject ambAndProv = new AmbulanceAndProviderObject();
-            ambAndProv.LatLangValues = result;
+           ambAndProv.LatLangValues = result.OrderBy(x=> x.DistanceValue).ToList();
             //ambAndProv.MedicalProviders = medicalProviders;
 
             return Json(new { result = ambAndProv }, JsonRequestBehavior.AllowGet);
@@ -53,20 +53,32 @@ namespace iSmartRescue.Controllers
         }
         public JsonResult SearchMedicalProvider(string emergencyCode, string location, string patientName, string phoneNumber, string latitude, string longtitude,string healthCard,string healthCardNumber)
         {
+            List<MedicalProviders> medicalProviders;
             List<LatLangValues> result = new List<LatLangValues>();
-
-            var medicalProviders = SmartRescueLibrary.GetMedicalProviderAvailability(emergencyCode, location);
-
-            //var ambilanceProviders = SmartRescueLibrary.GetMedicalAmbulanceAvailability(emergencyCode, location);
-            //if (medicalProviders.Count() != 0)
-            //{
-            //    result = SmartRescueLibrary.GetLocationDistance(ambilanceProviders, latitude, longtitude);
-            //}
-            result = SmartRescueLibrary.GetLocationDistance2(medicalProviders, latitude, longtitude);
-
             AmbulanceAndProviderObject ambAndProv = new AmbulanceAndProviderObject();
-            ambAndProv.LatLangValues = result;
-            ambAndProv.MedicalProviders = medicalProviders;
+
+
+            if (string.IsNullOrWhiteSpace(healthCardNumber) && string.IsNullOrWhiteSpace(healthCard))
+            {
+                medicalProviders = SmartRescueLibrary.GetMedicalProviderAvailability(emergencyCode, location);
+
+                result = SmartRescueLibrary.GetLocationDistance2(medicalProviders, latitude, longtitude);
+
+                ambAndProv = new AmbulanceAndProviderObject();
+                ambAndProv.LatLangValues = result.OrderBy(x => x.DistanceValue).ToList();
+                ambAndProv.MedicalProviders = medicalProviders;
+            }
+            else
+            {
+                medicalProviders = SmartRescueLibrary.GetMedicalProviderHealthCardAvailability(emergencyCode, location);
+
+                result = SmartRescueLibrary.GetLocationDistance2(medicalProviders, latitude, longtitude);
+
+                ambAndProv = new AmbulanceAndProviderObject();
+                ambAndProv.LatLangValues = result.OrderBy(x => x.DistanceValue).ToList();
+                ambAndProv.MedicalProviders = medicalProviders;
+            }
+            
 
             return Json(new { result = ambAndProv }, JsonRequestBehavior.AllowGet);
         }
