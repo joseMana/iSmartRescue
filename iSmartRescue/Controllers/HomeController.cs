@@ -25,18 +25,44 @@ namespace iSmartRescue.Controllers
 
             return Json(new { result = SmartRescueLibrary.GetGeoLocationApiResponse(location) }, JsonRequestBehavior.AllowGet);
         }
-
         public JsonResult SearchAmbulance(string emergencyCode, string location, string patientName, string phoneNumber,string latitude, string longtitude)
+        {
+            List<LatLangValues> result = new List<LatLangValues>();
+
+            //var medicalProviders = SmartRescueLibrary.GetMedicalProviderAvailability(emergencyCode, location);
+
+            var ambilanceProviders = SmartRescueLibrary.GetMedicalAmbulanceAvailability(emergencyCode, location);
+            //if (medicalProviders.Count() != 0)
+            //{
+                result = SmartRescueLibrary.GetLocationDistance(ambilanceProviders, latitude, longtitude);
+            //}
+
+            AmbulanceAndProviderObject ambAndProv = new AmbulanceAndProviderObject();
+            ambAndProv.LatLangValues = result;
+            //ambAndProv.MedicalProviders = medicalProviders;
+
+            return Json(new { result = ambAndProv }, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult DispatchAmbulance(string emergencyCode, string location, string patientName, string phoneNumber, string latitude, string longtitude,string ambulanceId,string medicalProviderName)
+        {
+            List<string> result = new List<string>();
+
+            result.Add(SmartRescueLibrary.CreateServiceRequest(emergencyCode, location, patientName, phoneNumber, latitude, longtitude, ambulanceId, medicalProviderName));
+
+            return Json(new { result = result }, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult SearchMedicalProvider(string emergencyCode, string location, string patientName, string phoneNumber, string latitude, string longtitude,string healthCard,string healthCardNumber)
         {
             List<LatLangValues> result = new List<LatLangValues>();
 
             var medicalProviders = SmartRescueLibrary.GetMedicalProviderAvailability(emergencyCode, location);
 
-            var ambilanceProviders = SmartRescueLibrary.GetMedicalAmbulanceAvailability(emergencyCode, location);
-            if (medicalProviders.Count() != 0)
-            {
-                result = SmartRescueLibrary.GetLocationDistance(ambilanceProviders, latitude, longtitude);
-            }
+            //var ambilanceProviders = SmartRescueLibrary.GetMedicalAmbulanceAvailability(emergencyCode, location);
+            //if (medicalProviders.Count() != 0)
+            //{
+            //    result = SmartRescueLibrary.GetLocationDistance(ambilanceProviders, latitude, longtitude);
+            //}
+            result = SmartRescueLibrary.GetLocationDistance2(medicalProviders, latitude, longtitude);
 
             AmbulanceAndProviderObject ambAndProv = new AmbulanceAndProviderObject();
             ambAndProv.LatLangValues = result;
@@ -44,12 +70,11 @@ namespace iSmartRescue.Controllers
 
             return Json(new { result = ambAndProv }, JsonRequestBehavior.AllowGet);
         }
-
-        public JsonResult RaiseEmergency(string emergencyCode, string location, string patientName, string phoneNumber, string latitude, string longtitude,string ambulanceId,string medicalProviderName)
+        public JsonResult RaiseEmergency(string serviceRequestId, string patientName, string phoneNumber, string healthCard, string healthCardAccountNumber, string medicalProviderName)
         {
             List<string> result = new List<string>();
 
-            SmartRescueLibrary.CreateServiceRequest(emergencyCode, location, patientName, phoneNumber, latitude, longtitude, ambulanceId, medicalProviderName);
+            SmartRescueLibrary.UpdateServiceRequest(serviceRequestId, patientName, phoneNumber, healthCard, healthCardAccountNumber, medicalProviderName);
 
             return Json(new { result = result }, JsonRequestBehavior.AllowGet);
         }

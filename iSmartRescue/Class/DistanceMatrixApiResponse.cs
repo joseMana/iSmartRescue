@@ -14,6 +14,10 @@ namespace iSmartRescue.Class
         public Guid ambulanceid { get; set; }
         public string ambulancecontactno { get; set; }
         public string ambulancecode { get; set; }
+        public Guid medicalproviderid { get; set; }
+        public string medicalprovidername { get; set; }
+        public string medicalproviderlocation { get; set; }
+
     }
     public class rows
     {

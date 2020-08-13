@@ -11,51 +11,78 @@ using Newtonsoft.Json;
 
 namespace iSmartRescue.Helper
 {
-    
     internal class SmartRescueLibrary
     {
         private static string connString = ConfigurationManager.ConnectionStrings["ismartRescueDB"].ConnectionString;
-        public static void CreateServiceRequest(string emergencyCode, string location, string patientName, string phoneNumber, string latitude, string longtitude, string ambulanceId,string medicalProviderId)
+        public static string CreateServiceRequest(string emergencyCode, string location, string patientName, string phoneNumber, string latitude, string longtitude, string ambulanceId,string medicalProviderId)
         {
-            using (SqlConnection connection = new SqlConnection(connString))
+            string retVal = "";
+            DataTable dtRetValue = new DataTable();
+            string strQuery = "INSERT INTO dbo.ServiceRequest(DateOfRequest, EmergencyTypeId, PatientAddressLine1, PatientName, PatientContact, LocationCoordinatesX, LocationCoordinatesY, AssignedAmbulanceId) " +
+                "OUTPUT Inserted.ServiceRequestId VALUES (GETDATE(),(SELECT EmergencyTypeId FROM dbo.EmergencyType WHERE EmergencyTypeCode = '"+emergencyCode+"')," +
+                "'"+location+"','"+patientName+"','"+phoneNumber+"','"+latitude+"','"+longtitude+"','"+ambulanceId+"')";
+            try
             {
-                SqlCommand command = new SqlCommand("INSERT INTO dbo.ServiceRequest(DateOfRequest,EmergencyTypeId,PatientAddressLine1,PatientName,PatientContact,LocationCoordinatesX,LocationCoordinatesY,AssignedAmbulanceId,AssignedMedicalProviderId) " +
-                    "VALUES (GETDATE(),(SELECT EmergencyTypeId FROM dbo.EmergencyType WHERE EmergencyTypeCode = @EmergencyTypeCode)," +
-                    "@Location,@PatientName,@PhoneNumber,@Latitude,@Longtitude,@AssignedAmbulanceId,(SELECT MedicalProviderId FROM dbo.MedicalProvider WHERE MedicalProviderName=@AssignedMedicalProviderId))"
-                    , connection);
-
-                command.Parameters.Add("@EmergencyTypeCode", SqlDbType.VarChar);
-                command.Parameters.Add("@Location", SqlDbType.VarChar);
-                command.Parameters.Add("@PatientName", SqlDbType.VarChar);
-                command.Parameters.Add("@PhoneNumber", SqlDbType.VarChar);
-                command.Parameters.Add("@Latitude", SqlDbType.VarChar);
-                command.Parameters.Add("@Longtitude", SqlDbType.VarChar);
-                command.Parameters.Add("@AssignedAmbulanceId", SqlDbType.VarChar);
-                command.Parameters.Add("@AssignedMedicalProviderId", SqlDbType.VarChar);
-
-                command.Parameters["@EmergencyTypeCode"].Value = emergencyCode;
-                command.Parameters["@Location"].Value = location;
-                command.Parameters["@PatientName"].Value = patientName;
-                command.Parameters["@PhoneNumber"].Value = phoneNumber;
-                command.Parameters["@Latitude"].Value = latitude;
-                command.Parameters["@Longtitude"].Value = longtitude;
-                command.Parameters["@AssignedAmbulanceId"].Value = ambulanceId;
-                command.Parameters["@AssignedMedicalProviderId"].Value = medicalProviderId;
-
-                try
+                using (SqlConnection conn = new SqlConnection(connString))
                 {
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                }
-                catch (DbException dbEx)
-                {
-                    //logging
-                }
-                catch (Exception ex)
-                {
-                    //logging
+                    DataSet dataset = new DataSet();
+                    SqlDataAdapter adapter = new SqlDataAdapter() { SelectCommand = new SqlCommand(strQuery, conn) };
+                    adapter.SelectCommand.CommandTimeout = 3600;
+                    adapter.SelectCommand.CommandType = CommandType.Text;
+                    adapter.Fill(dataset);
+                    try
+                    {
+                        dtRetValue = dataset.Tables[0];
+                    }
+                    catch (Exception e)
+                    {
+                        dtRetValue = dataset.Tables[0];
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+            }
+            foreach (DataRow row in dtRetValue.Rows)
+            {
+                retVal = row["ServiceRequestId"].ToString();
+            }
+            return retVal;
+        }
+        public static void UpdateServiceRequest(string serviceRequestId, string patientName, string phoneNumber, string healthCard, string healthCardAccountNumber, string medicalProviderName)
+        {
+            string retVal = "";
+            DataTable dtRetValue = new DataTable();
+            string strQuery = "UPDATE dbo.ServiceRequest " +
+                "SET PatientName = '"+patientName+"'," +
+                "PatientContact = '"+phoneNumber+ "'," +
+                "HealthCardProviderId = (SELECT HealthCardProviderName FROM dbo.HealthCardProvider " +"WHERE HealthCardProviderName='"+healthCard+"')," +
+                "HealthCardNumber='"+healthCardAccountNumber+ "', " +
+                "AssignedMedicalProviderId=(SELECT MedicalProviderId FROM dbo.MedicalProvider WHERE MedicalProviderName='"+medicalProviderName+"')" +
+                "WHERE ServiceRequestId = '" + serviceRequestId+"'";
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    DataSet dataset = new DataSet();
+                    SqlDataAdapter adapter = new SqlDataAdapter() { SelectCommand = new SqlCommand(strQuery, conn) };
+                    adapter.SelectCommand.CommandTimeout = 3600;
+                    adapter.SelectCommand.CommandType = CommandType.Text;
+                    adapter.Fill(dataset);
+                    try
+                    {
+                        dtRetValue = dataset.Tables[0];
+                    }
+                    catch (Exception e)
+                    {
+                        dtRetValue = dataset.Tables[0];
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            
         }
         public static List<AmbulanceLocation> GetMedicalAmbulanceAvailability(string emergencyCode, string location)
         {
@@ -143,7 +170,7 @@ namespace iSmartRescue.Helper
                     new MedicalProviders
                     {
                         TableRowId = tblRowId++,
-                        Name = row["MedicalProviderName"].ToString(),
+                        Name = row["MedicalProviderName"].ToString().Replace(" ","-"),
                         Latitude = row["CoordinatesX"].ToString(),
                         Longtitude = row["CoordinatesY"].ToString(),
                         AddressLine1 = row["AddressLine1"].ToString()
@@ -151,7 +178,6 @@ namespace iSmartRescue.Helper
             }
 
             return medicalProviders;
-
         }
         public static GeoLocationApiResponse GetGeoLocationApiResponse(string location)
         {
@@ -207,6 +233,42 @@ namespace iSmartRescue.Helper
 
             return CalculateNearestAmbulance(apiResults);
         }
+
+        public static List<LatLangValues> GetLocationDistance2(List<MedicalProviders> medicalProviders, string patientLatitude, string patientLongtitude)
+        {
+            List<DistanceMatrixApiResponse> apiResults = new List<DistanceMatrixApiResponse>();
+            string distanceMatrixUrl = "";
+
+
+            string html = string.Empty;
+            string originsLatitude = patientLatitude;
+            string originsLongtitude = patientLongtitude;
+
+            foreach (MedicalProviders al in medicalProviders)
+            {
+                distanceMatrixUrl = @"https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=[originsLatitude],[originsLongtitude]&destinations=[ambulanceLocations]&key=AIzaSyAUppA4_tlXLrFh-BpL1HSeYRcRAC9DIBg";
+                string medicalProvidersLocationString = al.Latitude + "," + al.Longtitude;
+                distanceMatrixUrl = distanceMatrixUrl.Replace("[originsLatitude]", originsLatitude).Replace("[originsLongtitude]", originsLongtitude).Replace("[ambulanceLocations]", medicalProvidersLocationString);
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(distanceMatrixUrl);
+                request.AutomaticDecompression = DecompressionMethods.GZip;
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    html = reader.ReadToEnd();
+                }
+                DistanceMatrixApiResponse apiResponse = JsonConvert.DeserializeObject<DistanceMatrixApiResponse>(html);
+                apiResponse.medicalprovidername = al.Name;
+                apiResponse.medicalproviderlocation = al.AddressLine1;
+
+                apiResults.Add(apiResponse);
+            }
+
+            return CalculateNearestMedicalProvider(apiResults);
+        }
+
         private static List<LatLangValues> CalculateNearestAmbulance(List<DistanceMatrixApiResponse> apiResults)
         {
             List<LatLangValues> result = new List<LatLangValues>();
@@ -222,6 +284,30 @@ namespace iSmartRescue.Helper
                         AmbulanceId = d.ambulanceid,
                         AmbulanceContactNo = d.ambulancecontactno,
                         AmbulanceCode = d.ambulancecode
+                    });
+                //Console.WriteLine(d.destination_addresses[0]);
+                //Console.WriteLine(d.rows[0].elements[0].distance.text);
+                //Console.WriteLine(d.rows[0].elements[0].distance.value);
+                //Console.WriteLine("");
+            }
+
+            return result;
+        }
+        private static List<LatLangValues> CalculateNearestMedicalProvider(List<DistanceMatrixApiResponse> apiResults)
+        {
+            List<LatLangValues> result = new List<LatLangValues>();
+
+            //get all values
+            foreach (DistanceMatrixApiResponse d in apiResults)
+            {
+
+                result.Add(
+                    new LatLangValues
+                    {
+                        DistanceValue = d.rows[0].elements[0].distance.value,
+                        MedicalProviderName = d.medicalprovidername,
+                        MedicalProviderLocation = d.medicalproviderlocation
+                        
                     });
                 //Console.WriteLine(d.destination_addresses[0]);
                 //Console.WriteLine(d.rows[0].elements[0].distance.text);

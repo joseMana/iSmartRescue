@@ -28,7 +28,7 @@
             $("#ambulancedataTable tr").removeClass("highlight");
             $(this).addClass("highlight");
         });
-       
+
         $("#medProviderdataTable tr").click(function (e) {
             $("#medProviderdataTable tr").removeClass("highlight");
             $(this).addClass("highlight");
@@ -51,18 +51,17 @@
     }
 
     .modal-body {
-        height: 400px;
+        height: 485px;
         overflow-y: auto;
     }
 </style>
-
 
 <div class="container-fluid">
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#myModal" style="background: red;">Raise Emergency <i class="fas fa-exclamation"></i></a>
+        <a href="#" class="btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#myModal" style="background: red;">Raise Emergency <i class="fas fa-exclamation"></i></a>
     </div>
 
     <!-- Content Row -->
@@ -342,9 +341,17 @@
     <!-- Modal -->
     <div class="modal fade" id="myModal" role="dialog">
         <div class="modal-dialog modal-lg">
+            <div id="raiseEmergencySuccessMessage" class="alert alert-success alert-dismissible" style="display:none;">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>Success!</strong><span id="raiseEmergencySuccessMessagep"></span>
+            </div>
+            <div id="DispatchAmbulanceSuccessMessage" class="alert alert-success alert-dismissible" style="display:none;">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>Success!</strong><span id="DispatchAmbulanceSuccessMessagep"></span>
+            </div>
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" style="float:left">EMERGENCY</h4>
+                    <h4 class="modal-title" style="float:left">RAISE AN EMERGENCY</h4>
                 </div>
                 <div class="modal-body">
                     <div class="container">
@@ -355,21 +362,10 @@
                                     <input type="text" class="form-control" id="emergencyCode">
                                 </div>
                                 <div class="form-group">
-                                    <label>Patient Name:</label>
-                                    <input type="text" class="form-control" id="patientName">
-                                </div>
-                                <div class="form-group">
-                                    <label>Phone Number:</label>
-                                    <input type="text" class="form-control" id="phoneNumber">
-                                </div>
-                                <div class="form-group">
                                     <label>Location:<span style="font-size:12px;font-style:italic">(Geolocation is enabled)</span></label>
                                     <input type="text" class="form-control" id="location">
                                 </div>
-                                <div class="checkbox">
-                                    <label>Patient Has HealthCard?</label>
-                                    <input type="checkbox">
-                                </div>
+
                                 <div class="form-group">
                                     <p>Latitude:<span id="lat"></span></p>
                                     <p>Longtitude:<span id="lng"></span></p>
@@ -377,12 +373,56 @@
                                     <p>Formatted Address:<span id="address"></span></p>
                                 </div>
                                 <div class="form-group">
-                                    <button type="button" class="btn btn-success" style="background:green;float:left" onclick="searchAmbulance()">Search Ambulance & Provider</button>
+                                    <button type="button" class="btn btn-success" style="background:green" onclick="searchAmbulance()">Search Ambulance</button>
                                 </div>
-                                <div class="form-group">
-                                    <table>
-                                    </table>
+                                <table id="ambulancedataTable" class="table table-striped table-bordered table-hover dataTable no-footer" role="grid" aria-describedby="dataTables-example_info" style="display:none">
+                                    <thead>
+                                        <tr role="row">
+                                            <th>AmbulanceID</th>
+                                            <th>AmbulanceCode</th>
+                                            <th>Distance Between Patient</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                                <div id="hideForm1" style="display:none;">
+                                    <div class="form-group">
+                                        <button id="btnDispatchAmbulance" type="button" class="btn btn-success" style="background:green" onclick="dispatchAmbulance()">Dispatch Ambulance!</button>
+                                    </div>
+                                    <div id="hideForm2" style="display:none;">
+                                        <div class="form-group">
+                                            <label>Patient Name:</label>
+                                            <input type="text" class="form-control" id="patientName">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone Number:</label>
+                                            <input type="text" class="form-control" id="phoneNumber">
+                                        </div>
+                                        <div class="checkbox" onchange="showHealthCardTextbox()">
+                                            <label>Patient Has HealthCard?</label>
+                                            <input type="checkbox">
+                                        </div>
+                                        <div id="hideForm3" style="display:none;">
+                                            <div class="form-group">
+                                                <label>Health Card Information:</label>
+                                                <input type="text" class="form-control" id="healthCardInformation">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Health Card Account Number:</label>
+                                                <input type="text" class="form-control" id="healthCardAccountNumber">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-group">
+                                                <button type="button" class="btn btn-success" style="background:green" onclick="searchMedicalProvider()">Search Medical Providers</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
+
                             </div>
                             <div class="col-xs-6">
                                 <div class="form-group">
@@ -390,24 +430,13 @@
                                 </div>
                             </div>
                         </div>
-                        <table id="ambulancedataTable" class="table table-striped table-bordered table-hover dataTable no-footer" role="grid" aria-describedby="dataTables-example_info" style="display:none">
-                            <thead>
-                                <tr role="row">
-                                    <th>AmbulanceID</th>
-                                    <th>AmbulanceCode</th>
-                                    <th>Distance Between Patient</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+
 
                         <table id="medProviderdataTable" class="table table-striped table-bordered table-hover dataTable no-footer" role="grid" aria-describedby="dataTables-example_info" style="display:none">
                             <thead>
                                 <tr role="row">
                                     <th>MedicalProviderName</th>
-                                    <th>MedicalProviderId</th>
+                                    <th>Distance Between Patient</th>
                                     <th>Location</th>
                                     <th></th>
                                 </tr>
@@ -416,24 +445,7 @@
                             </tbody>
                         </table>
 
-                        <div style="display:none;">
-                            <div class="form-group">
-                                <label>Patient Name:</label>
-                                <input type="text" class="form-control" id="patientName">
-                            </div>
-                            <div class="form-group">
-                                <label>Phone Number:</label>
-                                <input type="text" class="form-control" id="phoneNumber">
-                            </div>
-                            <div class="form-group">
-                                <label>Health Card Information:</label>
-                                <input type="text" class="form-control" id="healthCardInformation">
-                            </div>
-                            <div class="form-group">
-                                <label>Health Card Account Number:</label>
-                                <input type="text" class="form-control" id="healthCardAccountNumber">
-                            </div>
-                        </div>
+
 
                     </div>
 
@@ -544,13 +556,191 @@
                         "<td><input id='" + result.result.LatLangValues[i].AmbulanceId + "' type='button' class='btn btn-primary' value='Select Ambulance' onclick='selectAmbulance(this.id)'/> </td ></tr > ");
                 }
 
+                document.getElementById('hideForm1').style.display = "block";
+
+                //$('#medProviderdataTable tbody tr').remove();
+                //$('#medProviderdataTable').css({ display: "block" });
+                //for (var i = 0; i < result.result.MedicalProviders.length; i++) {
+                //    $("#medProviderdataTable tbody").append(
+                //        "<tr id='" + result.result.MedicalProviders[i].TableRowId + "'><td>" + result.result.MedicalProviders[i].Name + "</td><td>" + result.result.MedicalProviders[i].AddressLine1 + "</td>" +
+                //        "<td><input id='" + result.result.MedicalProviders[i].Name + "' type='button' class='btn btn-primary' value='Select Medical Provider' onclick='selectMedicalProvider(this.id)'/> </td></tr> ");
+                //}
+            },
+            error: function (req, status, error) {
+                console.log("Req: " + req);
+                console.log("Status: " + status);
+                console.log("Error: " + error);
+                $('#modalOverlay').modal("hide");
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#modalOverlay').modal("hide");
+                }, 500);
+            },
+            beforeSend: function () {
+                $('#modalOverlay').modal("show");
+            },
+        });
+    }
+    function dispatchAmbulance() {
+        var emergencyCode = $('#emergencyCode').val();
+        //var location = $('#location').val();
+        var patientName = $('#patientName').val();
+        var phoneNumber = $('#phoneNumber').val();
+        var ambulanceId = sessionAmbulanceId;
+        var healthCardInformation = $('#healthCardInformation').val();
+        var healthCardAccountNumber = $('#healthCardAccountNumber').val();
+
+        //geolocation apis
+        var latitude = document.getElementById('lat').innerText;
+        var longtitude = document.getElementById('lng').innerText;
+        var location = document.getElementById('address').innerText;
+
+        $.ajax({
+            url: '/Home/DispatchAmbulance',
+            data: {
+                'emergencyCode': emergencyCode,
+                'location': location,
+                'patientName': patientName,
+                'phoneNumber': phoneNumber,
+                'latitude': latitude,
+                'longtitude': longtitude,
+                'ambulanceId': ambulanceId,
+            },
+            dataType: "json",
+            type: "GET",
+            success: function (result) {
+                serviceRequestId = result.result[0];
+                document.getElementById('btnDispatchAmbulance').style.background = 'red';
+                document.getElementById('btnDispatchAmbulance').innerText = 'Ambulance Dispatched!'
+                $("#btnDispatchAmbulance").attr("disabled", "");
+                document.getElementById('hideForm2').style.display = "block";
+                document.getElementById('DispatchAmbulanceSuccessMessage').style.display = "block";
+                document.getElementById('DispatchAmbulanceSuccessMessagep').innerText = "\nAmbulance with ID of :\n" + ambulanceId + "\n has been dispatched to\n" + location;
+
+
+                //$('#dataTable tbody').remove();
+                //$('#dataTable').css({ display: "block" });
+
+                //for (var i = 0; i < result.result.length; i++) {
+                //    $("#dataTable").append(
+                //        "<tr><td>" + result.result[i].AmbulanceId + "</td><td>" + result.result[i].AmbulanceCode + "</td>" +
+                //        "<td>" + result.result[i].DistanceValue + "</td>" +
+                //        "<td><input type='button' class='btn btn-primary' value='Select Ambulance'/> </td ></tr > ");
+                //}
+
+            },
+            error: function (req, status, error) {
+                console.log("Req: " + req);
+                console.log("Status: " + status);
+                console.log("Error: " + error);
+                $('#modalOverlay').modal("hide");
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#modalOverlay').modal("hide");
+                }, 500);
+            },
+            beforeSend: function () {
+                $('#modalOverlay').modal("show");
+            },
+        });
+    }
+    function searchMedicalProvider() {
+        var emergencyCode = $('#emergencyCode').val();
+        //var location = $('#location').val();
+        var patientName = $('#patientName').val();
+        var phoneNumber = $('#phoneNumber').val();
+        var healthCard = $('#healthCardInformation').val();
+        var healthCardNumber = $('#healthCardAccountNumber').val();
+
+        //geolocation apis
+        var latitude = document.getElementById('lat').innerText;
+        var longtitude = document.getElementById('lng').innerText;
+        var location = document.getElementById('address').innerText;
+
+        $.ajax({
+            url: '/Home/SearchMedicalProvider',
+            data: {
+                'emergencyCode': emergencyCode,
+                'location': location,
+                'patientName': patientName,
+                'phoneNumber': phoneNumber,
+                'latitude': latitude,
+                'longtitude': longtitude,
+                'healthCard': healthCard,
+                'healthCardNumber': healthCardNumber
+            },
+            dataType: "json",
+            type: "GET",
+            success: function (result) {
+                //$('#ambulancedataTable tbody tr').remove();
+                //$('#ambulancedataTable').css({ display: "block" });
+                //for (var i = 0; i < result.result.LatLangValues.length; i++) {
+                //    $("#ambulancedataTable tbody").append(
+                //        "<tr id='" + result.result.LatLangValues[i].AmbulanceId + "'><td>" + result.result.LatLangValues[i].AmbulanceId + "</td><td>" + result.result.LatLangValues[i].AmbulanceCode + "</td>" +
+                //        "<td>" + result.result.LatLangValues[i].DistanceValue + "</td>" +
+                //        "<td><input id='" + result.result.LatLangValues[i].AmbulanceId + "' type='button' class='btn btn-primary' value='Select Ambulance' onclick='selectAmbulance(this.id)'/> </td ></tr > ");
+                //}
+
                 $('#medProviderdataTable tbody tr').remove();
                 $('#medProviderdataTable').css({ display: "block" });
-                for (var i = 0; i < result.result.MedicalProviders.length; i++) {
+                for (var i = 0; i < result.result.LatLangValues.length; i++) {
+                    var newName = result.result.LatLangValues[i].MedicalProviderName.replace(/-/g, ' ');
                     $("#medProviderdataTable tbody").append(
-                        "<tr id='" + result.result.MedicalProviders[i].TableRowId + "'><td>" + result.result.MedicalProviders[i].Name + "</td><td>" + result.result.MedicalProviders[i].AddressLine1 + "</td>" +
-                        "<td><input id='" + result.result.MedicalProviders[i].Name + "' type='button' class='btn btn-primary' value='Select Medical Provider' onclick='selectMedicalProvider(this.id)'/> </td></tr> ");
+                        "<tr id='" + result.result.LatLangValues[i].MedicalProviderName + "'><td>" + newName + "</td><td>" + result.result.LatLangValues[i].DistanceValue  + "</td>" + "<td>" + result.result.LatLangValues[i].MedicalProviderLocation+"</td>" +
+                        "<td><input id='" + result.result.LatLangValues[i].MedicalProviderName + "' type='button' class='btn btn-primary' value='Select Medical Provider' onclick='selectMedicalProvider(this.id)'/> </td></tr> ");
                 }
+            },
+            error: function (req, status, error) {
+                console.log("Req: " + req);
+                console.log("Status: " + status);
+                console.log("Error: " + error);
+                $('#modalOverlay').modal("hide");
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#modalOverlay').modal("hide");
+                }, 500);
+            },
+            beforeSend: function () {
+                $('#modalOverlay').modal("show");
+            },
+        });
+    }
+    function raiseEmergency() {
+        var srId = serviceRequestId;
+        //var location = $('#location').val();
+        var patientName = $('#patientName').val();
+        var phoneNumber = $('#phoneNumber').val();
+        var medicalProviderName = sessionMedicalProvider.replace(/-/g, ' ');
+        var healthCard = $('#healthCardInformation').val();
+        var healthCardAccountNumber = $('#healthCardAccountNumber').val();
+
+
+        $.ajax({
+            url: '/Home/RaiseEmergency',
+            data: {
+                'serviceRequestId': srId,
+                'patientName': patientName,
+                'phoneNumber': phoneNumber,
+                'healthCard': healthCard,
+                'healthCardAccountNumber': healthCardAccountNumber,
+                'medicalProviderName': medicalProviderName
+            },
+            dataType: "json",
+            type: "GET",
+            success: function (result) {
+                $('#dataTable tbody').remove();
+                $('#dataTable').css({ display: "block" });
+                for (var i = 0; i < result.result.length; i++) {
+                    $("#dataTable").append(
+                        "<tr><td>" + result.result[i].AmbulanceId + "</td><td>" + result.result[i].AmbulanceCode + "</td>" +
+                        "<td>" + result.result[i].DistanceValue + "</td>" +
+                        "<td><input type='button' class='btn btn-primary' value='Select Ambulance'/> </td ></tr > ");
+                }
+                document.getElementById('raiseEmergencySuccessMessage').style.display = "block";
+                document.getElementById('raiseEmergencySuccessMessagep').innerText = "Created a new Service Request with ID of :" + serviceRequestId;
             },
             error: function (req, status, error) {
                 console.log("Req: " + req);
@@ -590,62 +780,17 @@
         $('#' + id).css({ background: "lightgreen" });
         sessionMedicalProvider = id;
     }
-    function raiseEmergency() {
-        var emergencyCode = $('#emergencyCode').val();
-        //var location = $('#location').val();
-        var patientName = $('#patientName').val();
-        var phoneNumber = $('#phoneNumber').val();
-        var healthCardInformation = $('#healthCardInformation').val();
-        var healthCardAccountNumber = $('#healthCardAccountNumber').val();
-
-        //geolocation apis
-        var latitude = document.getElementById('lat').innerText;
-        var longtitude = document.getElementById('lng').innerText;
-        var location = document.getElementById('address').innerText;
-
-        $.ajax({
-            url: '/Home/RaiseEmergency',
-            data: {
-                'emergencyCode': emergencyCode,
-                'location': location,
-                'patientName': patientName,
-                'phoneNumber': phoneNumber,
-                'latitude': latitude,
-                'longtitude': longtitude,
-                'ambulanceId': sessionAmbulanceId,
-                'medicalProviderName': sessionMedicalProvider
-            },
-            dataType: "json",
-            type: "GET",
-            success: function (result) {
-                $('#dataTable tbody').remove();
-                $('#dataTable').css({ display: "block" });
-
-                for (var i = 0; i < result.result.length; i++) {
-                    $("#dataTable").append(
-                        "<tr><td>" + result.result[i].AmbulanceId + "</td><td>" + result.result[i].AmbulanceCode + "</td>" +
-                        "<td>" + result.result[i].DistanceValue + "</td>" +
-                        "<td><input type='button' class='btn btn-primary' value='Select Ambulance'/> </td ></tr > ");
-                }
-
-            },
-            error: function (req, status, error) {
-                console.log("Req: " + req);
-                console.log("Status: " + status);
-                console.log("Error: " + error);
-                $('#modalOverlay').modal("hide");
-            },
-            complete: function () {
-                setTimeout(function () {
-                    $('#modalOverlay').modal("hide");
-                }, 500);
-            },
-            beforeSend: function () {
-                $('#modalOverlay').modal("show");
-            },
-        });
+    function showHealthCardTextbox() {
+        var isDisplayed = document.getElementById('hideForm3').style.display;
+        if (isDisplayed == "block") {
+            document.getElementById('hideForm3').style.display = "none";
+            document.getElementById('healthCardInformation').value = "";
+            document.getElementById('healthCardAccountNumber').value = "";
+        }
+        else {
+            document.getElementById('hideForm3').style.display = "block";
+        }
     }
-
     $('#location').on("input", function () {
         var loc = this.value;
 
@@ -664,7 +809,9 @@
                 var formatted_address = result.result.candidates[0].formatted_address;
                 var latitude = result.result.candidates[0].geometry.location.lat;
                 var longtitude = result.result.candidates[0].geometry.location.lng;
-                var anchorTag = result.result.candidates[0].photos[0].html_attributions[0].split('"')[1];
+                var anchorTag = "https://www.google.com/maps/place/" + latitude + "," + longtitude;
+                //var anchorTag = result.result.candidates[0].photos[0].html_attributions[0].split('"')[1];
+
 
                 document.getElementById('lat').innerText = latitude;
                 document.getElementById('lng').innerText = longtitude;
