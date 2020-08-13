@@ -82,11 +82,13 @@ namespace iSmartRescue.Controllers
 
             return Json(new { result = ambAndProv }, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult RaiseEmergency(string serviceRequestId, string patientName, string phoneNumber, string healthCard, string healthCardAccountNumber, string medicalProviderName)
+        public JsonResult RaiseEmergency(string serviceRequestId, string patientName, string phoneNumber, string healthCard, string healthCardAccountNumber, string medicalProviderName,string emergencyCode,string ambulanceId)
         {
             List<string> result = new List<string>();
 
             SmartRescueLibrary.UpdateServiceRequest(serviceRequestId, patientName, phoneNumber, healthCard, healthCardAccountNumber, medicalProviderName);
+
+            SmartRescueLibrary.SendText(patientName, ((healthCard != "") ? true : false),"EMERGENCY!", healthCardAccountNumber,"EMERGENCY", emergencyCode, ambulanceId) ;
 
             return Json(new { result = result }, JsonRequestBehavior.AllowGet);
         }

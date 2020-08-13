@@ -367,5 +367,45 @@ namespace iSmartRescue.Helper
 
             return result;
         }
+
+        public static void SendText(string strName, bool healthStatus, string strReason, string strInfo, string strRemarks,string emergencyCode,string ambulanceId)
+        {
+            string CPNumber = "639219833634";
+            try
+            {
+                WebClient client = new WebClient();
+
+                string strhealthStatus = "";
+
+                if (healthStatus == true)
+                {
+
+                    strhealthStatus = "YES";
+                }
+                else
+                {
+                    strhealthStatus = "NO";
+                }
+                string message = "EMERGENCY CODE : "+ emergencyCode + "\nAmbulanceID : "+ ambulanceId + "\nWe would like to request an ambulance for: " + strName + "%0a" +
+                      "Reason: " + strReason + "%0a" +
+                      "With Health Card? " + strhealthStatus + "%0a" +
+                      "Health Card Information: " + strInfo + "%0a" +
+                      "Additional Notes: " + strRemarks;
+                Stream s = client.OpenRead(string.Format("https://platform.clickatell.com/messages/http/send?" +
+                    "apiKey=a9fqSjDARTOsQWhHGYztYQ==&" +
+                    "to=" + CPNumber + "&" +
+                    "content=" + message));
+                StreamReader reader = new StreamReader(s);
+                string result = reader.ReadToEnd();
+                //Console.WriteLine("Send");
+            }
+
+            catch (Exception ex)
+            {
+                //Console.WriteLine("Error: " + ex.ToString());
+            }
+
+        }
+
     }
 }

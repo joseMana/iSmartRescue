@@ -139,7 +139,9 @@
     <Content Include="css\sb-admin-2.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="img\amb.png" />
     <Content Include="img\anne.jpg" />
+    <Content Include="img\Creative-Tail-ambulance.svg.png" />
     <Content Include="img\undraw_posting_photo.svg" />
     <Content Include="js\demo\chart-area-demo.js" />
     <Content Include="js\demo\chart-bar-demo.js" />
