@@ -56,7 +56,7 @@ namespace iSmartRescue.Helper
             string strQuery = "UPDATE dbo.ServiceRequest " +
                 "SET PatientName = '"+patientName+"'," +
                 "PatientContact = '"+phoneNumber+ "'," +
-                "HealthCardProviderId = (SELECT HealthCardProviderName FROM dbo.HealthCardProvider " +"WHERE HealthCardProviderName='"+healthCard+"')," +
+                "HealthCardProviderId = (SELECT HealthCardProviderId FROM dbo.HealthCardProvider " +"WHERE HealthCardProviderName='"+healthCard+"')," +
                 "HealthCardNumber='"+healthCardAccountNumber+ "', " +
                 "AssignedMedicalProviderId=(SELECT MedicalProviderId FROM dbo.MedicalProvider WHERE MedicalProviderName='"+medicalProviderName+"')" +
                 "WHERE ServiceRequestId = '" + serviceRequestId+"'";

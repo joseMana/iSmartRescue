@@ -10,6 +10,8 @@
 <!--Google Map Js-->
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUppA4_tlXLrFh-BpL1HSeYRcRAC9DIBg&callback=initMap&libraries=&v=weekly" defer></script>
+
+
 <style>
     #target {
         width: 345px;
@@ -35,12 +37,59 @@
         });
     });
     let map;
-
     function initMap() {
-        map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: 14.5960804, lng: 120.9843656 },
-            zoom: 14
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 16,
+            center: new google.maps.LatLng(14.5964957, 120.9445402),
+            mapTypeId: 'roadmap'
         });
+
+        // defines custom icons
+        var icons = {
+            parking: {
+                icon: 'https://www.calibrepress.com/wp-content/themes/calibre/images/icon_facebook.png'
+            },
+            library: {
+                icon: 'https://maps.google.com/mapfiles/kml/shapes/library_maps.png'
+            },
+            info: {
+                icon: 'https://www.worldremit.com/images/mish/icon-apple.svg'
+            }
+        };
+
+        function addMarker(feature) {
+            var marker = new google.maps.Marker({
+                position: feature.position,
+                icon: icons[feature.type].icon,
+                map: map
+            });
+        }
+        // I wrote this - don't know if it works...
+        function addInfoWindow(feature) {
+            // this part is from https://developers.google.com/maps/documentation/javascript/infowindows
+            var infowindow = new google.maps.InfoWindow({
+                content: features.content
+            });
+        }
+        // defines locations
+        var features = [
+            {
+                position: new google.maps.LatLng(14.5349838, 120.9804938),
+                type: 'info',
+                content: 'Info 1'
+            }
+        ];
+
+        // adds markers via the features table
+        for (var i = 0, feature; feature = features[i]; i++) {
+            addMarker(feature);
+            addInfoWindow(feature);
+        }
+
+        // marker variable is only defined within the addMarker function
+        /* marker.addListener('click', function() {
+           infowindow.open(map, marker);
+        });*/
     }
 </script>
 <!--Modal Scrollbar-->
@@ -336,11 +385,12 @@
 
         </div>
     </div>
-
+    
     <!-- Modal -->
     <div class="modal fade" id="myModal" role="dialog">
         <div class="modal-dialog modal-lg">
-            <div id="raiseEmergencySuccessMessage" class="alert alert-success alert-dismissible" style="display:none;">
+        
+            <div id="raiseEmergencySuccessMessage" class="alert alert-success alert-dismissible" style="display:none">
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                 <strong>Success!</strong><span id="raiseEmergencySuccessMessagep"></span>
             </div>
@@ -358,7 +408,14 @@
                             <div class="col-md-8">
                                 <div class="form-group">
                                     <label>Emergency Code:</label>
-                                    <input type="text" class="form-control" id="emergencyCode">
+                                    <select id="optEmergencyCode" name="emergencyCode" class="form-control multiselect">
+                                        <option value="-">-</option>
+                                        <option value="1001">1001 - Accident</option>
+                                        <option value="1002">1002 - Extreme Pain in Lower Back</option>
+                                        <option value="1003">1003 - Heart Attack</option>
+                                        <option value="1004">1004 - Gun shot</option>
+                                        <option value="1005">1005 - Poison Cases</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label>Location:<span style="font-size:12px;font-style:italic">(Geolocation is enabled)</span></label>
@@ -406,7 +463,14 @@
                                         <div id="hideForm3" style="display:none;">
                                             <div class="form-group">
                                                 <label>Health Card Information:</label>
-                                                <input type="text" class="form-control" id="healthCardInformation">
+                                                <select id="optHealthCard" name="healthCard" class="form-control multiselect">
+                                                    <option value="-">-</option>
+                                                    <option value="Ayala Healthcare Holding Inc">Ayala Healthcare Holding Inc</option>
+                                                    <option value="Caritas Health Shield">Caritas Health Shield</option>
+                                                    <option value="Medicard Philippines Incorporation">Medicard Philippines Incorporation</option>
+                                                    <option value="Philcare Manila">Philcare Manila</option>
+                                                    <option value="Maxicare Healthcare Corporation">Maxicare Healthcare Corporation</option>
+                                                </select>
                                             </div>
                                             <div class="form-group">
                                                 <label>Health Card Account Number:</label>
@@ -517,9 +581,10 @@
     }
 </style>
 <!-- Page Js -->
+
 <script>
     function searchAmbulance() {
-        var emergencyCode = $('#emergencyCode').val();
+        var emergencyCode = document.getElementById('optEmergencyCode').value; if (emergencyCode == "-") { emergencyCode = "";}
         //var location = $('#location').val();
         var patientName = $('#patientName').val();
         var phoneNumber = $('#phoneNumber').val();
@@ -580,7 +645,7 @@
         });
     }
     function dispatchAmbulance() {
-        var emergencyCode = $('#emergencyCode').val();
+        var emergencyCode = document.getElementById('optEmergencyCode').value; if (emergencyCode == "-") { emergencyCode = ""; }
         //var location = $('#location').val();
         var patientName = $('#patientName').val();
         var phoneNumber = $('#phoneNumber').val();
@@ -615,6 +680,8 @@
                 document.getElementById('DispatchAmbulanceSuccessMessage').style.display = "block";
                 document.getElementById('DispatchAmbulanceSuccessMessagep').innerText = "\nAmbulance with ID of :\n" + ambulanceId + "\n has been dispatched to\n" + location;
 
+                setTimeout(function () { $("#DispatchAmbulanceSuccessMessage").fadeOut(); }, 3000);
+
 
                 //$('#dataTable tbody').remove();
                 //$('#dataTable').css({ display: "block" });
@@ -644,12 +711,12 @@
         });
     }
     function searchMedicalProvider() {
-        var emergencyCode = $('#emergencyCode').val();
+        var emergencyCode = document.getElementById('optEmergencyCode').value; if (emergencyCode == "-") { emergencyCode = ""; }
         //var location = $('#location').val();
         var patientName = $('#patientName').val();
         var phoneNumber = $('#phoneNumber').val();
-        var healthCard = $('#healthCardInformation').val();
-        var healthCardNumber = $('#healthCardAccountNumber').val();
+        var healthCard = document.getElementById("optHealthCard").value; if (healthCard == "-") { healthCard = ""; }
+        var healthCardNumber = document.getElementById("healthCardAccountNumber").value;
 
         //geolocation apis
         var latitude = document.getElementById('lat').innerText;
@@ -711,7 +778,7 @@
         var patientName = $('#patientName').val();
         var phoneNumber = $('#phoneNumber').val();
         var medicalProviderName = sessionMedicalProvider.replace(/-/g, ' ');
-        var healthCard = $('#healthCardInformation').val();
+        var healthCard = document.getElementById("optHealthCard").value; if (healthCard == "-") { healthCard = ""; }
         var healthCardAccountNumber = $('#healthCardAccountNumber').val();
 
 
@@ -737,7 +804,8 @@
                         "<td><input type='button' class='btn btn-primary' value='Select Ambulance'/> </td ></tr > ");
                 }
                 document.getElementById('raiseEmergencySuccessMessage').style.display = "block";
-                document.getElementById('raiseEmergencySuccessMessagep').innerText = "Created a new Service Request with ID of :" + serviceRequestId;
+                document.getElementById('raiseEmergencySuccessMessagep').innerText = "\nCreated a new Service Request with ID of : \n" + serviceRequestId;
+                setTimeout(function () { $('#raiseEmergencySuccessMessage').fadeOut(); }, 3000);
             },
             error: function (req, status, error) {
                 console.log("Req: " + req);
@@ -832,5 +900,4 @@
             },
         });
     });
-
 </script>

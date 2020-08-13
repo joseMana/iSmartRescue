@@ -70,7 +70,7 @@ namespace iSmartRescue.Controllers
             }
             else
             {
-                medicalProviders = SmartRescueLibrary.GetMedicalProviderHealthCardAvailability(emergencyCode, location);
+                medicalProviders = SmartRescueLibrary.GetMedicalProviderHealthCardAvailability(emergencyCode, healthCard);
 
                 result = SmartRescueLibrary.GetLocationDistance2(medicalProviders, latitude, longtitude);
 
